@@ -1,0 +1,427 @@
+import pygame
+import math
+import random
+import time
+from pygame import mixer
+from menu import menu
+
+# Inicializa o pygame
+pygame.init()
+
+# cria a tela do jogo
+screen = pygame.display.set_mode((800, 600))
+
+# Background
+background = pygame.image.load('cozinhaFundo.png')
+
+#Background sound
+#mixer.music.load('Interplanetary Odyssey.ogg')
+#mixer.music.play(-1)
+
+# Titulo e icone
+pygame.display.set_caption("Ai Q Fome")
+icon = pygame.image.load('fruits.png')
+pygame.display.set_icon(icon)
+
+# Player
+playerImg = pygame.image.load('garfinho.png')
+playerX = 370
+playerY = 480
+playerX_change = 0
+
+# Fruit-Apple
+appleImg = []
+appleX = []
+appleY = []
+appleX_change = []
+appleY_change = []
+num_of_apples = 2
+
+for i in range (num_of_apples):
+    appleImg.append(pygame.image.load('apple.png'))
+    appleX.append(random.randint(0, 735))
+    appleY.append(random.randint(50, 150))
+    appleX_change.append(4)
+    appleY_change.append(40)
+
+# Fruit-Banana
+bananaImg = []
+bananaX = []
+bananaY = []
+bananaX_change = []
+bananaY_change = []
+num_of_bananas = 2
+
+for i in range (num_of_bananas):
+    bananaImg.append(pygame.image.load('bananas.png'))
+    bananaX.append(random.randint(0, 735))
+    bananaY.append(random.randint(50, 150))
+    bananaX_change.append(4)
+    bananaY_change.append(40)
+
+# Fruit-Avocado
+avocadoImg = []
+avocadoX = []
+avocadoY = []
+avocadoX_change = []
+avocadoY_change = []
+num_of_avocados = 2
+
+for i in range (num_of_avocados):
+    avocadoImg.append(pygame.image.load('avocado.png'))
+    avocadoX.append(random.randint(0, 735))
+    avocadoY.append(random.randint(50, 150))
+    avocadoX_change.append(4)
+    avocadoY_change.append(40)
+
+#Bad Food - Pizza
+pizzaImg = []
+pizzaX = []
+pizzaY = []
+pizzaX_change = []
+pizzaY_change = []
+num_of_pizzas = 2
+
+for i in range (num_of_pizzas):
+    pizzaImg.append(pygame.image.load('pizza.png'))
+    pizzaX.append(random.randint(0, 735))
+    pizzaY.append(random.randint(50, 150))
+    pizzaX_change.append(4)
+    pizzaY_change.append(40)
+
+#Bad Food - Chicken
+chickenImg = []
+chickenX = []
+chickenY = []
+chickenX_change = []
+chickenY_change = []
+num_of_chickens = 2
+
+for i in range (num_of_chickens):
+    chickenImg.append(pygame.image.load('chicken-leg.png'))
+    chickenX.append(random.randint(0, 735))
+    chickenY.append(random.randint(50, 150))
+    chickenX_change.append(4)
+    chickenY_change.append(40)
+
+#Bad Food - Humburger
+hamburgerImg = []
+hamburgerX = []
+hamburgerY = []
+hamburgerX_change = []
+hamburgerY_change = []
+num_of_hamburgers = 2
+
+for i in range (num_of_hamburgers):
+    hamburgerImg.append(pygame.image.load('hamburger.png'))
+    hamburgerX.append(random.randint(0, 735))
+    hamburgerY.append(random.randint(50, 150))
+    hamburgerX_change.append(4)
+    hamburgerY_change.append(40)
+
+
+#Contador de poder especial
+contador_especial = 0
+
+#Score
+score_value = 0
+life_value = 3
+font = pygame.font.Font('freesansbold.ttf', 32)
+
+textX = 10
+textY = 10
+positionX = 500
+positionY = 10
+
+#Game Over Text
+over_font = pygame.font.Font('freesansbold.ttf', 64)
+
+
+def game_over_text():
+    over_text = font.render("GAME OVER", True, (255, 255, 255))
+    screen.blit(over_text, (300,250))
+    pygame.display.update()
+    time.sleep(3)
+
+
+
+def show_score(x,y):
+    score = over_font.render("Score : " + str(score_value), True, (255, 255, 255))
+    screen.blit(score, (x,y))
+
+def show_life(x,y):
+    life = over_font.render("Life : " + str(life_value), True, (255, 255, 255))
+    screen.blit(life, (x,y))
+
+def player(x, y):
+    screen.blit(playerImg, (x, y))
+
+
+def apple(x, y, i):
+    screen.blit(appleImg[i], (x, y))
+
+def banana(x, y, i):
+    screen.blit(bananaImg[i], (x, y))
+
+def avocado(x, y, i):
+    screen.blit(avocadoImg[i], (x, y))
+
+def pizza(x, y, i):
+    screen.blit(pizzaImg[i], (x, y))
+
+def chicken(x, y, i):
+    screen.blit(chickenImg[i], (x, y))
+
+def hamburger(x, y, i):
+    screen.blit(hamburgerImg[i], (x, y))
+
+
+def isCollision(enemyX, enemyY, bulletX, bulletY):
+    distance = math.sqrt((math.pow(enemyX - bulletX, 2)) + (math.pow(enemyY - bulletY, 2)))
+    if distance < 55:
+        return True
+    else:
+        return False
+
+#Jogo
+def jogo():
+       running = True
+       global score_value
+       global life_value
+       global contador_especial
+       global playerX
+       global playerY
+       global playerX_change
+       while running:
+           screen.fill((0, 0, 255))
+           # backgorund image
+           screen.blit(background, (0, 0))
+           for event in pygame.event.get():
+               if event.type == pygame.QUIT:
+                   pygame.quit()
+                   quit()
+               # if keastroke is pressed check wheter its right or left
+               if event.type == pygame.KEYDOWN:
+                   if event.key == pygame.K_LEFT:
+                       playerX_change = -5
+                   if event.key == pygame.K_RIGHT:
+                       playerX_change = 5
+
+
+               if event.type == pygame.KEYUP:
+                   if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                       playerX_change = 0
+
+           # Checking for boundaries so it doesnt go out of bounds
+           playerX += playerX_change
+           if playerX <= 0:
+               playerX = 0
+           elif playerX >= 736:
+               playerX = 736
+
+           # Fruit - Apple moviment
+           if score_value >= 0 and score_value < 10 or score_value >= 30 and score_value < 45 or score_value >= 65 and score_value < 75 or score_value >= 95 and score_value < 100:
+               for i in range (num_of_apples):
+
+                   #Game Over
+                   if appleY[i] > 550:
+                       appleX[i] = random.randint(0, 735)
+                       appleY[i] = random.randint(50, 150)
+                       life_value -= 1
+
+                   if life_value == 0:
+                       break
+
+                   #Nível de dificuldade aumenta
+                   if score_value >= 25 and score_value < 50:
+                        appleY[i] += 0.6
+                   elif score_value >= 50 and score_value < 75:
+                       appleY[i] += 0.7
+                   elif score_value >= 75 and score_value < 100:
+                       appleY[i] += 0.8
+                   else:
+                        appleY[i] += 0.5
+
+
+                   # Collision
+                   collison = isCollision(appleX[i], appleY[i], playerX, playerY)
+                   if collison:
+                       score_value += 1
+                       appleX[i] = random.randint(0, 735)
+                       appleY[i] = random.randint(50, 150)
+                   apple(appleX[i], appleY[i], i)
+
+
+           #Fruit - Banana moviment
+           if score_value >= 5 and score_value < 15 or score_value >= 25 and score_value < 30 or score_value >= 55 and score_value < 65 or score_value >= 85 and score_value < 95:
+               for i in range (num_of_bananas):
+                    #Game Over
+                   if bananaY[i] > 550:
+                       bananaX[i] = random.randint(0, 735)
+                       bananaY[i] = random.randint(50, 150)
+                       life_value -= 1
+
+                   if life_value == 0:
+                       break
+
+
+                   #Nível de dificuldade aumenta
+                   if score_value >= 25 and score_value < 50:
+                        bananaY[i] += 0.6
+                   elif score_value >= 50 and score_value < 75:
+                       bananaY[i] += 0.7
+                   elif score_value >= 75 and score_value < 100:
+                       bananaY[i] += 0.8
+                   else:
+                        bananaY[i] += 0.5
+
+                   # Collision
+                   collison = isCollision(bananaX[i], bananaY[i], playerX, playerY)
+                   if collison:
+                       score_value += 1
+                       contador_especial += 1
+                       bananaX[i] = random.randint(0, 735)
+                       bananaY[i] = random.randint(50, 150)
+                   banana(bananaX[i], bananaY[i], i)
+            #
+
+           #Fruit - Avocado moviment
+           if score_value >= 15 and score_value < 25 or score_value >= 45 and score_value < 55 or score_value >= 75 and score_value < 85:
+               for i in range (num_of_avocados):
+
+                   #Game Over
+                   if avocadoY[i] > 550:
+                       avocadoX[i] = random.randint(0, 735)
+                       avocadoY[i] = random.randint(50, 150)
+                       life_value -= 1
+
+                   if life_value == 0:
+                       break
+
+                   #Nível de dificuldade aumenta
+                   if score_value >= 25 and score_value < 50:
+                        avocadoY[i] += 0.6
+                   elif score_value >= 50 and score_value < 75:
+                       avocadoY[i] += 0.7
+                   elif score_value >= 75 and score_value < 100:
+                       avocadoY[i] += 0.8
+                   else:
+                        avocadoY[i] += 0.5
+
+                   # Collision
+                   collison = isCollision(avocadoX[i], avocadoY[i], playerX, playerY)
+                   if collison:
+                       score_value += 1
+                       avocadoX[i] = random.randint(0, 735)
+                       avocadoY[i] = random.randint(50, 150)
+
+                   avocado(avocadoX[i], avocadoY[i], i)
+
+            #
+
+           # Bad Food - Pizza moviment
+           if score_value >= 10 and score_value < 20 or score_value >= 40 and score_value < 50 or score_value >= 70 and score_value < 80:
+               for i in range(num_of_pizzas):
+                   # Game Over
+                   if pizzaY[i] > 550:
+                       pizzaX[i] = random.randint(0, 735)
+                       pizzaY[i] = random.randint(50, 150)
+
+                   if life_value == 0:
+                       break
+
+                   #Nível de dificuldade aumenta
+                   if score_value >= 25 and score_value < 50:
+                        pizzaY[i] += 0.6
+                   elif score_value >= 50 and score_value < 75:
+                       pizzaY[i] += 0.7
+                   elif score_value >= 75 and score_value < 100:
+                       pizzaY[i] += 0.8
+                   else:
+                        pizzaY[i] += 0.5
+
+                   # Collision garfinho
+                   collison = isCollision(pizzaX[i], pizzaY[i], playerX, playerY)
+                   if collison:
+                       life_value -= 1
+                       pizzaX[i] = random.randint(0, 735)
+                       pizzaY[i] = random.randint(50, 150)
+
+                   pizza(pizzaX[i], pizzaY[i], i)
+
+           # Bad Food - Chicken moviment
+           if score_value >= 20 and score_value < 30 or score_value >= 50 and score_value < 60 or score_value >= 80 and score_value < 90:
+               for i in range(num_of_chickens):
+                   # Game Over
+                   if chickenY[i] > 550:
+                       chickenX[i] = random.randint(0, 735)
+                       chickenY[i] = random.randint(50, 150)
+
+                   if life_value == 0:
+                       break
+
+                   # Nível de dificuldade aumenta
+                   if score_value >= 25 and score_value < 50:
+                       chickenY[i] += 0.6
+                   elif score_value >= 50 and score_value < 75:
+                       chickenY[i] += 0.7
+                   elif score_value >= 75 and score_value < 100:
+                       chickenY[i] += 0.8
+                   else:
+                       chickenY[i] += 0.5
+
+                   # Collision garfinho
+                   collison = isCollision(chickenX[i], chickenY[i], playerX, playerY)
+                   if collison:
+                       life_value -= 1
+                       chickenX[i] = random.randint(0, 735)
+                       chickenY[i] = random.randint(50, 150)
+
+                   chicken(chickenX[i], chickenY[i], i)
+
+           #Bad Food - Hamburguer
+           if score_value >= 30 and score_value < 40 or score_value >= 60 and score_value < 70 or score_value >= 90 and score_value < 100:
+               for i in range(num_of_hamburgers):
+
+                   # Game Over
+                   if hamburgerY[i] > 550:
+                       hamburgerX[i] = random.randint(0, 735)
+                       hamburgerY[i] = random.randint(50, 150)
+
+                   if life_value == 0:
+                       break
+
+                   # Nível de dificuldade aumenta
+                   if score_value >= 25 and score_value < 50:
+                       hamburgerY[i] += 0.6
+                   elif score_value >= 50 and score_value < 75:
+                       hamburgerY[i] += 0.7
+                   elif score_value >= 75 and score_value < 100:
+                       hamburgerY[i] += 0.8
+                   else:
+                       hamburgerY[i] += 0.5
+
+                   # Collision garfinho
+                   collison = isCollision(hamburgerX[i], hamburgerY[i], playerX, playerY)
+                   if collison:
+                       life_value -= 1
+                       hamburgerX[i] = random.randint(0, 735)
+                       hamburgerY[i] = random.randint(50, 150)
+
+                   hamburger(hamburgerX[i], hamburgerY[i], i)
+
+           player(playerX, playerY)
+           show_score(textX, textY)
+           show_life(positionX, positionY)
+           if life_value == 0:
+               game_over_text()
+               running = False
+           pygame.display.update()
+       life_value = 3
+       score_value = 0
+
+
+# Game Loop
+while True:
+    menu()
+    jogo()
