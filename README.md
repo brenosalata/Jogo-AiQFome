@@ -19,7 +19,7 @@ O menu do jogo é apresantado de forma a seguir:
 ![Menu](https://github.com/brenosalata/Jogo-AiQFome/blob/5471ef404ef04bc9862f959888f212f21084f55f/TelaMenuComSom.png)
 
 
-# ------------------------------------------------------------------------
+# ---------------------------------------------------------------
 Quando apertar Jogar o jogo irá iniciar (Se quer ver isso acontecer, baixe o jogo kkkkk)
  - Once you press play the game starts (if you wish to see it happen, download it ahahah)
 
